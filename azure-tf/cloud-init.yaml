@@ -1,0 +1,65 @@
+﻿#cloud-config
+package_update: true
+packages:
+  - nginx
+
+write_files:
+  - path: /var/www/html/index.html
+    owner: www-data:www-data
+    permissions: '0644'
+    content: |
+      <!doctype html>
+      <html lang="en">
+      <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Azure NGINX Demo</title>
+        <style>
+          body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 40px; }
+          .card { max-width: 520px; border: 1px solid #e5e7eb; border-radius: 12px; padding: 24px; box-shadow: 0 6px 18px rgba(0,0,0,.06); }
+          h1 { margin: 0 0 8px; font-size: 1.75rem; }
+          #clock { font-size: 1.25rem; color: #2563eb; margin-bottom: 12px; }
+          #count { font-weight: 700; font-size: 1.2rem; }
+          button { background: #111827; color: #fff; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+          button:hover { background: #1f2937; }
+          .muted { color: #6b7280; margin-top: 16px; font-size: .9rem; }
+        </style>
+      </head>
+      <body>
+        <div class="card">
+          <h1>Welcome </h1>
+          <div id="clock">--:--:--</div>
+          <p>Click count: <span id="count">0</span></p>
+          <button id="btn">+1</button>
+          <p class="muted">Counter is saved in your browser (localStorage).</p>
+        </div>
+
+        <script>
+          // Live clock
+          const clockEl = document.getElementById('clock');
+          const tick = () => {
+            const d = new Date();
+            const pad = n => String(n).padStart(2,'0');
+            clockEl.textContent = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+          };
+          tick(); setInterval(tick, 1000);
+
+          // Click counter with localStorage
+          const KEY = 'click_counter';
+          const countEl = document.getElementById('count');
+          const btn = document.getElementById('btn');
+          let count = Number(localStorage.getItem(KEY) || '0');
+          countEl.textContent = count;
+
+          btn.addEventListener('click', () => {
+            count += 1;
+            localStorage.setItem(KEY, String(count));
+            countEl.textContent = count;
+          });
+        </script>
+      </body>
+      </html>
+
+runcmd:
+  - systemctl enable nginx
+  - systemctl restart nginx
